@@ -3,54 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bill Management</title>
+    <title>Bill Management Pro</title>
     <style>
         :root { --sec: #00b894; --adm: #0984e3; --kaj: #d63031; --bg: #f0f2f5; }
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; padding: 10px; color: #333; }
-        
         #dashboard { display: none; max-width: 1200px; margin: 0 auto; background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
         #login-box { max-width: 350px; margin: 80px auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; }
-        
         .header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 15px; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
         .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
-        
         input, select { padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; outline: none; box-sizing: border-box; }
-        #search-input { width: 200px; }
-
-        .role-tag { padding: 6px 15px; border-radius: 4px; color: white; font-weight: bold; font-size: 12px; text-transform: uppercase; }
-        .icon-group { display: flex; gap: 15px; font-size: 20px; color: #555; }
-        .icon-btn { cursor: pointer; transition: 0.2s; }
-        .icon-btn:hover { color: var(--adm); }
-
         .stats-bar { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
         .stat-card { flex: 1; min-width: 120px; background: #f8f9fa; padding: 10px; border-radius: 8px; text-align: center; border: 1px solid #eee; }
         .stat-card span { display: block; font-size: 18px; font-weight: bold; color: var(--adm); }
         .stat-card label { font-size: 11px; color: #777; text-transform: uppercase; }
-
         .table-wrap { overflow-x: auto; margin-top: 10px; border: 1px solid #eee; border-radius: 8px; }
-        table { width: 100%; border-collapse: collapse; min-width: 800px; }
+        table { width: 100%; border-collapse: collapse; min-width: 900px; }
         th { background: #f8f9fa; padding: 12px; text-align: left; font-size: 13px; color: #666; }
         td { padding: 12px; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
-        
-        .row-pending { border-left: 4px solid #f08c00; }
-        .row-accepted { border-left: 4px solid #0984e3; }
-        .row-received { border-left: 4px solid #00b894; }
-
         .btn { border: none; padding: 8px 16px; border-radius: 4px; color: white; cursor: pointer; font-weight: 600; font-size: 13px; }
-
-        .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; align-items: end; }
-        .form-row div label { display: block; font-size: 11px; margin-bottom: 4px; font-weight: bold; color: #777; }
-
+        .del-btn { color: #d63031; cursor: pointer; font-weight: bold; font-size: 18px; margin-left: 10px; }
+        .del-disabled { color: #ccc; cursor: not-allowed; }
         .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 90; }
         .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 25px; border-radius: 12px; z-index: 100; width: 90%; max-width: 400px; }
-
-        @media (max-width: 600px) { #search-input { width: 100%; } .header { justify-content: center; } }
+        .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; align-items: end; }
     </style>
 </head>
 <body>
 
 <div id="login-box">
-    <h2 style="color: #444;">Bill Management</h2>
+    <h2>Bill Management</h2>
     <input type="password" id="access-pass" placeholder="Enter Password" style="width:100%">
     <button class="btn" style="background: var(--adm); width:100%; margin-top:15px; padding:12px;" onclick="checkAccess()">Sign In</button>
 </div>
@@ -60,19 +41,19 @@
 <div id="dashboard">
     <div class="header">
         <div class="controls">
-            <div id="role-display" class="role-tag">Role</div>
+            <div id="role-display" class="role-tag" style="padding: 6px 15px; border-radius: 4px; color: white; font-weight: bold;">Role</div>
             <input type="text" id="search-input" placeholder="Search Party..." onkeyup="refreshTable()">
-            <div class="icon-group">
-                <span class="icon-btn" onclick="toggleView('month-view')" title="Calendar">📅</span>
-                <span class="icon-btn" id="log-trigger" style="display: none;" onclick="toggleView('log-view')" title="Audit Logs">📜</span>
-                <span class="icon-btn" onclick="toggleView('settings-view')" title="Settings">⚙️</span>
+            <div style="display: flex; gap: 15px; font-size: 20px; cursor: pointer;">
+                <span onclick="toggleView('month-view')">📅</span>
+                <span id="log-trigger" style="display: none;" onclick="toggleView('log-view')">📜</span>
+                <span onclick="toggleView('settings-view')">⚙️</span>
             </div>
         </div>
         <button class="btn" style="background: #444;" onclick="location.reload()">Logout</button>
     </div>
 
     <div class="stats-bar">
-        <div class="stat-card"><span id="stat-total">0</span><label>Total Bills</label></div>
+        <div class="stat-card"><span id="stat-total">0</span><label>Total</label></div>
         <div class="stat-card"><span id="stat-accepted" style="color:var(--adm)">0</span><label>Accepted</label></div>
         <div class="stat-card"><span id="stat-pending" style="color:#f08c00">0</span><label>Pending</label></div>
         <div class="stat-card"><span id="stat-received" style="color:#00b894">0</span><label>Received</label></div>
@@ -80,47 +61,43 @@
 
     <div id="settings-view" class="modal">
         <h3>Settings</h3>
-        <p style="font-size: 13px;">Update password for <strong><span id="target-role"></span></strong>:</p>
+        <p>Update Password:</p>
         <input type="password" id="new-pw" placeholder="New Password" style="width: 100%; margin-bottom: 15px;">
-        <button class="btn" style="background: var(--adm); width: 100%;" onclick="saveNewPassword()">Update Password</button>
-        
-        <div id="admin-only-settings" style="display:none; margin-top: 20px; border-top: 1px solid #eee; padding-top: 15px;">
-            <p style="font-size: 12px; color: #d63031; font-weight: bold;">CRITICAL ACTIONS:</p>
-            <button class="btn" style="background: var(--kaj); width: 100%;" onclick="resetAllData()">Reset All Data</button>
-        </div>
+        <button class="btn" style="background: var(--adm); width: 100%; margin-bottom: 10px;" onclick="saveNewPassword()">Update Password</button>
+        <button class="btn" style="background: #27ae60; width: 100%;" onclick="exportToExcel()">📊 Export to Excel (CSV)</button>
     </div>
 
     <div id="month-view" class="modal">
-        <h3>Filter by Month</h3>
+        <h3>Filter Month</h3>
         <select id="filter-month" style="width: 100%; margin-bottom: 15px;">
             <option value="all">All Months</option>
-            <option value="0">January</option><option value="1">February</option><option value="2">March</option>
-            <option value="3">April</option><option value="4">May</option><option value="5">June</option>
-            <option value="6">July</option><option value="7">August</option><option value="8">September</option>
-            <option value="9">October</option><option value="10">November</option><option value="11">December</option>
+            <option value="0">Jan</option><option value="1">Feb</option><option value="2">Mar</option>
+            <option value="3">Apr</option><option value="4">May</option><option value="5">Jun</option>
+            <option value="6">Jul</option><option value="7">Aug</option><option value="8">Sep</option>
+            <option value="9">Oct</option><option value="10">Nov</option><option value="11">Dec</option>
         </select>
-        <button class="btn" style="background: var(--adm); width: 100%;" onclick="applyMonthlyFilter()">Apply Filter</button>
+        <button class="btn" style="background: var(--adm); width: 100%;" onclick="applyMonthlyFilter()">Apply</button>
     </div>
 
     <div id="log-view" class="modal" style="max-width: 600px;">
-        <h3>System Audit Logs</h3>
-        <div id="log-list" style="max-height: 350px; overflow-y: auto; font-size: 12px; border: 1px solid #eee; padding: 10px; background: #fafafa;"></div>
+        <h3>Audit Logs</h3>
+        <div id="log-list" style="max-height: 300px; overflow-y: auto; font-size: 12px;"></div>
     </div>
 
     <div id="security-form" style="display:none;">
         <div class="form-row">
             <div><label>Bill Date</label><input type="date" id="b_date" style="width:100%"></div>
-            <div><label>Party Name</label><input type="text" id="party" placeholder="Name" oninput="autoCap(this)" style="width:100%"></div>
+            <div><label>Party Name</label><input type="text" id="party" oninput="autoCap(this)" style="width:100%"></div>
             <div><label>Bill No</label><input type="text" id="b_no" style="width:100%"></div>
             <div><label>Qty</label><input type="number" id="qty" style="width:100%"></div>
-            <div><label>Amount (₹)</label><input type="number" id="amt" style="width:100%"></div>
+            <div><label>Amount</label><input type="number" id="amt" style="width:100%"></div>
             <button class="btn" style="background: var(--sec); height: 40px;" onclick="addBill()">Submit</button>
         </div>
     </div>
 
     <div class="table-wrap">
         <table>
-            <thead><tr><th>Date</th><th>Party</th><th>Bill No</th><th>Qty</th><th>Amount</th><th>Status</th><th>Actions</th></tr></thead>
+            <thead><tr><th>Date</th><th>Party</th><th>Bill No</th><th>Qty</th><th>Amount</th><th>Status</th><th>Rec. Date</th><th>Actions</th></tr></thead>
             <tbody id="bill-list"></tbody>
         </table>
     </div>
@@ -136,19 +113,10 @@
     const billsRef = ref(db, 'bills');
     const configRef = ref(db, 'config');
 
-    let config = {};
-    let bills = [];
-    let currentRole = '', activeMonth = 'all';
+    let config = {}, bills = [], currentRole = '', activeMonth = 'all';
 
-    onValue(configRef, (snapshot) => {
-        config = snapshot.val() || { 'user': 'security', 'verify#99': 'admin', '123': 'kajal' };
-    });
-
-    onValue(billsRef, (snapshot) => {
-        const data = snapshot.val();
-        bills = data ? Object.keys(data).map(key => ({ ...data[key], id: key })) : [];
-        refreshTable();
-    });
+    onValue(configRef, s => config = s.val() || { 'user': 'security', 'verify#99': 'admin', '123': 'kajal' });
+    onValue(billsRef, s => { const d = s.val(); bills = d ? Object.keys(d).map(k => ({ ...d[k], id: k })) : []; refreshTable(); });
 
     window.checkAccess = () => {
         const p = document.getElementById('access-pass').value;
@@ -157,51 +125,26 @@
             document.getElementById('login-box').style.display = 'none';
             document.getElementById('dashboard').style.display = 'block';
             document.getElementById('role-display').innerText = currentRole;
-            document.getElementById('target-role').innerText = currentRole;
             document.getElementById('role-display').style.background = currentRole === 'security' ? 'var(--sec)' : (currentRole === 'admin' ? 'var(--adm)' : 'var(--kaj)');
-            
             if(currentRole === 'security') document.getElementById('security-form').style.display = 'block';
-            if(currentRole === 'admin') {
-                document.getElementById('log-trigger').style.display = 'inline-block';
-                document.getElementById('admin-only-settings').style.display = 'block';
-            }
-
+            if(currentRole === 'admin') document.getElementById('log-trigger').style.display = 'inline-block';
             refreshTable();
-        } else { alert("Access Denied"); }
-    };
-
-    window.saveNewPassword = () => {
-        const newPass = document.getElementById('new-pw').value;
-        if (newPass.length < 3) return alert("Min 3 characters!");
-        const oldPassKey = Object.keys(config).find(key => config[key] === currentRole);
-        let newConfig = { ...config };
-        if (oldPassKey) delete newConfig[oldPassKey];
-        newConfig[newPass] = currentRole;
-
-        set(configRef, newConfig).then(() => {
-            alert("Password Updated Successfully!");
-            location.reload();
-        }).catch(err => alert("Error: " + err.message));
-    };
-
-    window.resetAllData = () => {
-        if(currentRole !== 'admin') return alert("Only admins can perform this action.");
-        if(confirm("DANGER: This will permanently delete ALL bill entries and logs. Continue?")) {
-            remove(billsRef).then(() => {
-                alert("Database cleared successfully!");
-                closeAllModals();
-            }).catch(err => alert("Error: " + err.message));
-        }
+        } else alert("Denied");
     };
 
     window.addBill = () => {
         const bD = document.getElementById('b_date').value;
         const party = document.getElementById('party').value;
-        if(!party || !bD) return alert("Required fields missing");
+        const no = document.getElementById('b_no').value;
+        if(!party || !bD) return alert("Missing fields");
+
+        const isDuplicate = bills.some(b => b.party.toLowerCase() === party.toLowerCase() && b.no === no);
+        if(isDuplicate) return alert("Error: Duplicate Bill No for this Party!");
+
         push(billsRef, { 
-            status: 'Pending', bD, party, no: document.getElementById('b_no').value,
+            status: 'Pending', bD, party, no, rDate: '-',
             qty: document.getElementById('qty').value, amt: document.getElementById('amt').value,
-            logs: [`Entry by ${currentRole} at ${new Date().toLocaleString()}`],
+            logs: [`Created by ${currentRole} at ${new Date().toLocaleString()}`],
             createdAt: Date.now()
         });
         ['b_date','party','b_no','qty','amt'].forEach(id => document.getElementById(id).value = '');
@@ -209,14 +152,30 @@
 
     window.updateStatus = (id, s) => {
         const b = bills.find(x => x.id === id);
-        const newLogs = [...(b.logs || []), `${s} by ${currentRole} at ${new Date().toLocaleString()}`];
-        update(ref(db, `bills/${id}`), { status: s, logs: newLogs });
+        const upd = { status: s, logs: [...(b.logs || []), `${s} by ${currentRole} at ${new Date().toLocaleString()}`] };
+        if(s === 'Received') upd.rDate = new Date().toLocaleDateString();
+        update(ref(db, `bills/${id}`), upd);
+    };
+
+    window.deleteBill = (id) => {
+        const b = bills.find(x => x.id === id);
+        if(b.status === 'Received') return;
+        if(confirm("Delete this entry?")) remove(ref(db, `bills/${id}`));
+    };
+
+    window.exportToExcel = () => {
+        let csv = "Date,Party,Bill No,Qty,Amount,Status,Received Date\n";
+        bills.forEach(b => csv += `${b.bD},${b.party},${b.no},${b.qty},${b.amt},${b.status},${b.rDate}\n`);
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = `Bills_Export_${new Date().toLocaleDateString()}.csv`;
+        a.click();
     };
 
     window.refreshTable = () => {
         const list = document.getElementById('bill-list');
         const search = document.getElementById('search-input').value.toLowerCase();
-        
         document.getElementById('stat-total').innerText = bills.length;
         document.getElementById('stat-accepted').innerText = bills.filter(x => x.status === 'Accepted').length;
         document.getElementById('stat-pending').innerText = bills.filter(x => x.status === 'Pending').length;
@@ -226,7 +185,7 @@
         bills.filter(b => {
             const d = new Date(b.bD);
             return (activeMonth === 'all' || d.getMonth().toString() === activeMonth) &&
-                   (b.party.toLowerCase().includes(search) || (b.no && b.no.toLowerCase().includes(search)));
+                   (b.party.toLowerCase().includes(search) || b.no.toLowerCase().includes(search));
         }).sort((a,b) => b.createdAt - a.createdAt).forEach(b => {
             let act = '--';
             if(b.status === 'Pending' && currentRole === 'admin') 
@@ -235,10 +194,20 @@
                 act = `<button class="btn" style="background:var(--kaj)" onclick="updateStatus('${b.id}','Received')">Receive</button>`;
             else if(b.status === 'Received') act = '✅';
 
-            list.innerHTML += `<tr class="row-${b.status.toLowerCase()}">
-                <td>${b.bD}</td><td><strong>${b.party}</strong></td><td>${b.no||'-'}</td>
-                <td>${b.qty||'0'}</td><td>₹${b.amt||'0'}</td><td>${b.status}</td><td>${act}</td></tr>`;
+            const delIcon = (currentRole === 'admin') ? 
+                `<span class="del-btn ${b.status === 'Received' ? 'del-disabled' : ''}" onclick="deleteBill('${b.id}')">✖</span>` : '';
+
+            list.innerHTML += `<tr><td>${b.bD}</td><td><strong>${b.party}</strong></td><td>${b.no}</td>
+                <td>${b.qty}</td><td>₹${b.amt}</td><td>${b.status}</td><td>${b.rDate}</td><td>${act} ${delIcon}</td></tr>`;
         });
+    };
+
+    window.saveNewPassword = () => {
+        const newPass = document.getElementById('new-pw').value;
+        if (newPass.length < 3) return alert("Short password");
+        const oldKey = Object.keys(config).find(k => config[k] === currentRole);
+        let nC = { ...config }; delete nC[oldKey]; nC[newPass] = currentRole;
+        set(configRef, nC).then(() => location.reload());
     };
 
     window.toggleView = (id) => { 
@@ -246,20 +215,12 @@
         document.getElementById(id).style.display = 'block'; 
         if(id === 'log-view') {
             const l = document.getElementById('log-list'); l.innerHTML = '';
-            let allLogs = [];
-            bills.forEach(b => (b.logs || []).forEach(m => allLogs.push({p: b.party, m: m})));
-            allLogs.reverse().forEach(log => l.innerHTML += `<div style="padding:6px; border-bottom:1px solid #eee;"><b>${log.p}:</b> ${log.m}</div>`);
+            bills.forEach(b => (b.logs || []).forEach(m => l.innerHTML = `<p><b>${b.party}:</b> ${m}</p>` + l.innerHTML));
         }
     };
-    
-    window.closeAllModals = () => {
-        document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
-        document.getElementById('overlay').style.display = 'none';
-    };
-
+    window.closeAllModals = () => { document.querySelectorAll('.modal').forEach(m => m.style.display = 'none'); document.getElementById('overlay').style.display = 'none'; };
     window.applyMonthlyFilter = () => { activeMonth = document.getElementById('filter-month').value; refreshTable(); closeAllModals(); };
     window.autoCap = (el) => { el.value = el.value.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '); };
 </script>
 </body>
 </html>
-
