@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bill Management Pro</title>
+    <title>Bill Management System</title>
     <style>
         :root { --sec: #00b894; --adm: #0984e3; --kaj: #d63031; --bg: #f0f2f5; }
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; padding: 10px; color: #333; }
-        #dashboard { display: none; max-width: 1200px; margin: 0 auto; background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        #dashboard { display: none; max-width: 1300px; margin: 0 auto; background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
         #login-box { max-width: 350px; margin: 80px auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; }
         .header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 15px; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
         .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
@@ -17,22 +17,24 @@
         .stat-card span { display: block; font-size: 18px; font-weight: bold; color: var(--adm); }
         .stat-card label { font-size: 11px; color: #777; text-transform: uppercase; }
         .table-wrap { overflow-x: auto; margin-top: 10px; border: 1px solid #eee; border-radius: 8px; }
-        table { width: 100%; border-collapse: collapse; min-width: 900px; }
+        table { width: 100%; border-collapse: collapse; min-width: 950px; }
         th { background: #f8f9fa; padding: 12px; text-align: left; font-size: 13px; color: #666; }
-        td { padding: 12px; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
+        td { padding: 12px; border-bottom: 1px solid #f0f0f0; font-size: 14px; vertical-align: middle; }
+        .status-cell { display: flex; flex-direction: column; line-height: 1.2; }
+        .time-stamp { font-size: 10px; color: #888; margin-top: 2px; }
         .btn { border: none; padding: 8px 16px; border-radius: 4px; color: white; cursor: pointer; font-weight: 600; font-size: 13px; }
         .del-btn { color: #d63031; cursor: pointer; font-weight: bold; font-size: 18px; margin-left: 10px; }
-        .del-disabled { color: #ccc; cursor: not-allowed; }
+        .del-disabled { color: #ccc; cursor: not-allowed; opacity: 0.3; }
         .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 90; }
         .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 25px; border-radius: 12px; z-index: 100; width: 90%; max-width: 400px; }
-        .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; align-items: end; }
+        .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; align-items: end; }
     </style>
 </head>
 <body>
 
 <div id="login-box">
     <h2>Bill Management</h2>
-    <input type="password" id="access-pass" placeholder="Enter Password" style="width:100%">
+    <input type="password" id="access-pass" placeholder="Password" style="width:100%">
     <button class="btn" style="background: var(--adm); width:100%; margin-top:15px; padding:12px;" onclick="checkAccess()">Sign In</button>
 </div>
 
@@ -41,7 +43,7 @@
 <div id="dashboard">
     <div class="header">
         <div class="controls">
-            <div id="role-display" class="role-tag" style="padding: 6px 15px; border-radius: 4px; color: white; font-weight: bold;">Role</div>
+            <div id="role-display" style="padding: 6px 15px; border-radius: 4px; color: white; font-weight: bold; font-size: 12px;">Role</div>
             <input type="text" id="search-input" placeholder="Search Party..." onkeyup="refreshTable()">
             <div style="display: flex; gap: 15px; font-size: 20px; cursor: pointer;">
                 <span onclick="toggleView('month-view')">📅</span>
@@ -61,10 +63,10 @@
 
     <div id="settings-view" class="modal">
         <h3>Settings</h3>
-        <p>Update Password:</p>
-        <input type="password" id="new-pw" placeholder="New Password" style="width: 100%; margin-bottom: 15px;">
-        <button class="btn" style="background: var(--adm); width: 100%; margin-bottom: 10px;" onclick="saveNewPassword()">Update Password</button>
-        <button class="btn" style="background: #27ae60; width: 100%;" onclick="exportToExcel()">📊 Export to Excel (CSV)</button>
+        <button class="btn" style="background: #27ae60; width: 100%; margin-bottom: 20px;" onclick="exportToExcel()">📊 Export to Excel</button>
+        <p>Change Password:</p>
+        <input type="password" id="new-pw" placeholder="New Password" style="width: 100%; margin-bottom: 10px;">
+        <button class="btn" style="background: var(--adm); width: 100%;" onclick="saveNewPassword()">Update</button>
     </div>
 
     <div id="month-view" class="modal">
@@ -97,7 +99,7 @@
 
     <div class="table-wrap">
         <table>
-            <thead><tr><th>Date</th><th>Party</th><th>Bill No</th><th>Qty</th><th>Amount</th><th>Status</th><th>Rec. Date</th><th>Actions</th></tr></thead>
+            <thead><tr><th>Inward Date</th><th>Bill Date</th><th>Party Name</th><th>Bill No</th><th>Qty</th><th>Amount</th><th>Status</th><th>Actions</th></tr></thead>
             <tbody id="bill-list"></tbody>
         </table>
     </div>
@@ -118,13 +120,18 @@
     onValue(configRef, s => config = s.val() || { 'user': 'security', 'verify#99': 'admin', '123': 'kajal' });
     onValue(billsRef, s => { const d = s.val(); bills = d ? Object.keys(d).map(k => ({ ...d[k], id: k })) : []; refreshTable(); });
 
+    const getStamp = () => {
+        const d = new Date();
+        return `${currentRole} @ ${d.getDate()}/${d.getMonth()+1} ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
+    };
+
     window.checkAccess = () => {
         const p = document.getElementById('access-pass').value;
         if(config[p]) {
             currentRole = config[p];
             document.getElementById('login-box').style.display = 'none';
             document.getElementById('dashboard').style.display = 'block';
-            document.getElementById('role-display').innerText = currentRole;
+            document.getElementById('role-display').innerText = currentRole.toUpperCase();
             document.getElementById('role-display').style.background = currentRole === 'security' ? 'var(--sec)' : (currentRole === 'admin' ? 'var(--adm)' : 'var(--kaj)');
             if(currentRole === 'security') document.getElementById('security-form').style.display = 'block';
             if(currentRole === 'admin') document.getElementById('log-trigger').style.display = 'inline-block';
@@ -136,40 +143,36 @@
         const bD = document.getElementById('b_date').value;
         const party = document.getElementById('party').value;
         const no = document.getElementById('b_no').value;
-        if(!party || !bD) return alert("Missing fields");
+        if(!party || !bD) return alert("Fields Required");
 
-        const isDuplicate = bills.some(b => b.party.toLowerCase() === party.toLowerCase() && b.no === no);
-        if(isDuplicate) return alert("Error: Duplicate Bill No for this Party!");
+        if(bills.some(b => b.party.toLowerCase() === party.toLowerCase() && b.no === no)) return alert("Duplicate Entry!");
 
         push(billsRef, { 
-            status: 'Pending', bD, party, no, rDate: '-',
+            status: 'Pending', 
+            inDate: new Date().toLocaleDateString(), // Auto-captured Inward Date
+            bD, party, no,
             qty: document.getElementById('qty').value, amt: document.getElementById('amt').value,
-            logs: [`Created by ${currentRole} at ${new Date().toLocaleString()}`],
+            stamp: getStamp(),
             createdAt: Date.now()
         });
         ['b_date','party','b_no','qty','amt'].forEach(id => document.getElementById(id).value = '');
     };
 
     window.updateStatus = (id, s) => {
-        const b = bills.find(x => x.id === id);
-        const upd = { status: s, logs: [...(b.logs || []), `${s} by ${currentRole} at ${new Date().toLocaleString()}`] };
-        if(s === 'Received') upd.rDate = new Date().toLocaleDateString();
-        update(ref(db, `bills/${id}`), upd);
+        update(ref(db, `bills/${id}`), { status: s, stamp: getStamp() });
     };
 
     window.deleteBill = (id) => {
-        const b = bills.find(x => x.id === id);
-        if(b.status === 'Received') return;
-        if(confirm("Delete this entry?")) remove(ref(db, `bills/${id}`));
+        if(confirm("Delete entry?")) remove(ref(db, `bills/${id}`));
     };
 
     window.exportToExcel = () => {
-        let csv = "Date,Party,Bill No,Qty,Amount,Status,Received Date\n";
-        bills.forEach(b => csv += `${b.bD},${b.party},${b.no},${b.qty},${b.amt},${b.status},${b.rDate}\n`);
+        let csv = "Inward Date,Bill Date,Party,Bill No,Qty,Amount,Status,Last Update\n";
+        bills.forEach(b => csv += `${b.inDate},${b.bD},${b.party},${b.no},${b.qty},${b.amt},${b.status},${b.stamp}\n`);
         const blob = new Blob([csv], { type: 'text/csv' });
-        const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
-        a.href = url; a.download = `Bills_Export_${new Date().toLocaleDateString()}.csv`;
+        a.href = window.URL.createObjectURL(blob);
+        a.download = `Inward_Report_${new Date().toLocaleDateString()}.csv`;
         a.click();
     };
 
@@ -187,24 +190,37 @@
             return (activeMonth === 'all' || d.getMonth().toString() === activeMonth) &&
                    (b.party.toLowerCase().includes(search) || b.no.toLowerCase().includes(search));
         }).sort((a,b) => b.createdAt - a.createdAt).forEach(b => {
-            let act = '--';
+            let actHtml = '--';
             if(b.status === 'Pending' && currentRole === 'admin') 
-                act = `<button class="btn" style="background:var(--adm)" onclick="updateStatus('${b.id}','Accepted')">Accept</button>`;
+                actHtml = `<button class="btn" style="background:var(--adm)" onclick="updateStatus('${b.id}','Accepted')">Accept</button>`;
             else if(b.status === 'Accepted' && currentRole === 'kajal') 
-                act = `<button class="btn" style="background:var(--kaj)" onclick="updateStatus('${b.id}','Received')">Receive</button>`;
-            else if(b.status === 'Received') act = '✅';
+                actHtml = `<button class="btn" style="background:var(--kaj)" onclick="updateStatus('${b.id}','Received')">Receive</button>`;
+            else if(b.status === 'Received') actHtml = '✅ Done';
 
-            const delIcon = (currentRole === 'admin') ? 
-                `<span class="del-btn ${b.status === 'Received' ? 'del-disabled' : ''}" onclick="deleteBill('${b.id}')">✖</span>` : '';
+            const isRec = b.status === 'Received';
+            const delMark = (currentRole === 'admin') ? 
+                `<span class="del-btn ${isRec ? 'del-disabled' : ''}" ${!isRec ? `onclick="deleteBill('${b.id}')"` : ''}>✖</span>` : '';
 
-            list.innerHTML += `<tr><td>${b.bD}</td><td><strong>${b.party}</strong></td><td>${b.no}</td>
-                <td>${b.qty}</td><td>₹${b.amt}</td><td>${b.status}</td><td>${b.rDate}</td><td>${act} ${delIcon}</td></tr>`;
+            list.innerHTML += `<tr>
+                <td style="color:#666; font-size:12px;">${b.inDate || '-'}</td>
+                <td>${b.bD}</td>
+                <td><strong>${b.party}</strong></td>
+                <td>${b.no}</td>
+                <td>${b.qty}</td>
+                <td>₹${b.amt}</td>
+                <td>
+                    <div class="status-cell">
+                        <b>${b.status}</b>
+                        <span class="time-stamp">${b.stamp || ''}</span>
+                    </div>
+                </td>
+                <td>${actHtml} ${delMark}</td>
+            </tr>`;
         });
     };
 
     window.saveNewPassword = () => {
         const newPass = document.getElementById('new-pw').value;
-        if (newPass.length < 3) return alert("Short password");
         const oldKey = Object.keys(config).find(k => config[k] === currentRole);
         let nC = { ...config }; delete nC[oldKey]; nC[newPass] = currentRole;
         set(configRef, nC).then(() => location.reload());
@@ -215,7 +231,7 @@
         document.getElementById(id).style.display = 'block'; 
         if(id === 'log-view') {
             const l = document.getElementById('log-list'); l.innerHTML = '';
-            bills.forEach(b => (b.logs || []).forEach(m => l.innerHTML = `<p><b>${b.party}:</b> ${m}</p>` + l.innerHTML));
+            bills.forEach(b => l.innerHTML = `<p style="border-bottom:1px solid #eee; padding:5px;"><b>${b.party}:</b> ${b.status} (${b.stamp})</p>` + l.innerHTML);
         }
     };
     window.closeAllModals = () => { document.querySelectorAll('.modal').forEach(m => m.style.display = 'none'); document.getElementById('overlay').style.display = 'none'; };
